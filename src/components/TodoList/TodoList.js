@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import "./TodoList.scss";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { ListBox } from "primereact/listbox";
 import { Panel } from "primereact/panel";
 
-import ListItem from "../ListItem/ListItem";
+import List from "../List/List";
 
 const TodoList = () => {
   const [task, setTask] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [doneTasks, setDoneTasks] = useState([]);
 
   const addTask = () => {
     if (task.trim()) {
@@ -19,15 +19,21 @@ const TodoList = () => {
   };
 
   const toggleTaskCompletion = (taskToToggle) => {
-    const updatedTasks = tasks.map((t) =>
-      t === taskToToggle ? { ...t, completed: !t.completed } : t
-    );
-    setTasks(updatedTasks);
+    if (taskToToggle.completed) {
+      setTasks([...tasks, { ...taskToToggle, completed: false }]);
+      setDoneTasks(doneTasks.filter((t) => t !== taskToToggle));
+    } else {
+      setDoneTasks([...doneTasks, { ...taskToToggle, completed: true }]);
+      setTasks(tasks.filter((t) => t !== taskToToggle));
+    }
   };
 
   const removeTask = (taskToRemove) => {
-    const updatedTasks = tasks.filter((t) => t !== taskToRemove);
-    setTasks(updatedTasks);
+    setTasks(tasks.filter((t) => t !== taskToRemove));
+  };
+
+  const removeDoneTask = (taskToRemove) => {
+    setDoneTasks(doneTasks.filter((t) => t !== taskToRemove));
   };
 
   return (
@@ -47,15 +53,16 @@ const TodoList = () => {
           />
         </div>
 
-        <ListBox
-          options={tasks}
-          itemTemplate={(item) => (
-            <ListItem
-              item={item}
-              onToggle={() => toggleTaskCompletion(item)}
-              onRemove={() => removeTask(item)}
-            ></ListItem>
-          )}
+        <List
+          listTitle="Tasks"
+          listData={tasks}
+          onToggle={toggleTaskCompletion}
+          onRemove={removeTask}
+        />
+        <List
+          listTitle="Done Tasks"
+          listData={doneTasks}
+          onRemove={removeDoneTask}
         />
       </Panel>
     </>
